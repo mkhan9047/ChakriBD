@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="0dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        app:cardBackgroundColor="#40000000"
+        android:layout_height="40dp">
+
+        <RelativeLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/simple_navi_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="11dp"
+                android:src="@drawable/ic_people_black_24dp" />
+
+            <TextView
+                android:id="@+id/simple_navi_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/simple_navi_icon"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="21dp"
+                android:layout_toEndOf="@+id/simple_navi_icon"
+                android:text="HOME"
+                android:textColor="#FFFF"
+                android:textSize="17sp" />
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

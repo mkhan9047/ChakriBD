@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Chakri BD</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+
+    <string-array name="link">
+        <item> govt job: http://­chakriapp.blogspot.co­m/2018/03/­blog-post_22.html</item>
+        <item>defecnce job: http://­chakriapp.blogspot.co­m/2018/03/­apr-5-2018.html</item>
+        <item>company job: http://­chakriapp.blogspot.co­m/2018/03/­blog-post_7.html</item>
+        <item>ENGO job: http://­chakriapp.blogspot.co­m/2018/02/­blog-post_73.html</item>
+        <item>weekly job: http://­chakriapp.blogspot.co­m/2018/03/pdf.html</item>
+        <item>Railway job: http://­chakriapp.blogspot.co­m/2018/01/­blog-post_65.html</item>
+        <item>teacher job: http://­chakriapp.blogspot.co­m/2018/01/­blog-post_20.html</item>
+        <item>parttime: http://­chakriapp.blogspot.co­m/2018/01/­daily-star-editorial-­14jan-2018.html</item>
+        <item>bankjob: http://­chakriapp.blogspot.co­m/2018/01/­blog-post_63.html</item>
+        <item>examalert: http://­chakriapp.blogspot.co­m/2017/12/­pdf_29.html</item>
+
+        <item>blog: pratiding24.blogspot­.com</item>
+    </string-array>
+</resources>
