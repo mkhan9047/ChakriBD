@@ -1,14 +1,21 @@
 package notification.push.com.chakribd;
 
 import android.annotation.SuppressLint;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,6 +39,7 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -56,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     String currentTitle;
     int count = 0;
     String urlToLoad;
+    SwipeRefreshLayout refreshLayout;
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +73,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
+            //this is action event for floting action bar
             @Override
             public void onClick(View view) {
                 if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -76,7 +87,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        refreshLayout = findViewById(R.id.swiperefresh);
 
+        refreshLayout.setColorSchemeResources(R.color.colorAccent,R.color.colorPrimary,R.color.colorPrimaryDark);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                webView.loadUrl(webView.getUrl());
+            }
+        });
 
         DaliBlurDrawerToggle daliBlurDrawerToggle = new DaliBlurDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close, new NavigationDrawerListener() {
 
@@ -108,30 +127,36 @@ mScroll = findViewById(R.id.scroll);
         adapter = new NaviListCustomAdapter(this, R.layout.nav_custom_list, pojoList);
         circularList.setAdapter(adapter);
 
+        //this is the click listener for main list
         circularList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 switch (i){
                     case 0:
+                        //click action for home
                        urlToLoad = "https://pratidin24.blogspot.com/";
                        loadSite(urlToLoad);
                        drawer.closeDrawer(GravityCompat.START);
                        break;
                     case 1:
+                        //click action for teacher job
                         urlToLoad = "http://chakriapp.blogspot.com/2018/01/blog-post_20.html";
                         loadSite(urlToLoad);
                         drawer.closeDrawer(GravityCompat.START);
                         break;
                     case 2:
+                        //click action for parttime job
                         urlToLoad = "http://chakriapp.blogspot.com/2018/01/daily-star-editorial-14jan-2018.html";
                         loadSite(urlToLoad);
                         drawer.closeDrawer(GravityCompat.START);
                         break;
                     case 3:
+                        //click action for govt job
                         urlToLoad = "http://chakriapp.blogspot.com/2018/03/blog-post_22.html";
                         loadSite(urlToLoad);
                         drawer.closeDrawer(GravityCompat.START);
                         break;
+                    //follow the list item order for other click action
 
                 }
             }
@@ -146,6 +171,8 @@ mScroll = findViewById(R.id.scroll);
         otherList = findViewById(R.id.other_list);
         otherAdapter = new NaviListCustomAdapter(this,R.layout.nav_custom_list,otherData);
         otherList.setAdapter(otherAdapter);
+
+
 
         setListViewHeightBasedOnChildren(otherList);
         setListViewHeightBasedOnChildren(circularList);
@@ -168,13 +195,72 @@ mScroll = findViewById(R.id.scroll);
         webView.getSettings().setUseWideViewPort(true);
         webView.getSettings().setBuiltInZoomControls(true);
         webView.getSettings().setDomStorageEnabled(true);
+
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+
                 view.loadUrl(request.toString());
                 currentTitle = view.getTitle();
-                
+
                 return false;
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, final String url) {
+
+
+
+                if(url.contains(".jpg") || url.contains(".png")){
+
+                    if(Build.VERSION.SDK_INT >=23){
+
+                        Context nContext = MainActivity.this.getApplicationContext();
+                        if(nContext.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                            MainActivity.this.requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                            return true;
+                        }
+                    }
+
+                    final AlertDialog.Builder dailog = new AlertDialog.Builder(MainActivity.this);
+                    dailog.setMessage("Do you want to Download this Image?");
+                    dailog.setIcon(R.mipmap.ic_launcher_round);
+                    dailog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            DownloadManager mdDownloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                            DownloadManager.Request requests = new DownloadManager.Request(
+                                    Uri.parse(url));
+                            File destinationFile = new File(
+                                    Environment.getExternalStorageDirectory(),
+                                    getFileName(url));
+                            requests.setDescription("Downloading ...");
+                            requests.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                            requests.setDestinationUri(Uri.fromFile(destinationFile));
+                            if (mdDownloadManager != null) {
+                                mdDownloadManager.enqueue(requests);
+                            }
+
+                        }
+                    });
+
+                    dailog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    dailog.show();
+
+
+
+
+                    return true;
+                }
+
+                return super.shouldOverrideUrlLoading(view, url);
+
             }
 
             @Override
@@ -187,12 +273,19 @@ mScroll = findViewById(R.id.scroll);
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 dialog.dismiss();
+                if(refreshLayout.isRefreshing()){
+                    refreshLayout.setRefreshing(false);
+                }
+
             }
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
                 dialog.dismiss();
+                if(refreshLayout.isRefreshing()){
+                    refreshLayout.setRefreshing(false);
+                }
             }
 
         });
@@ -205,16 +298,31 @@ mScroll = findViewById(R.id.scroll);
             }
         });
 
+        //this is the item click listener for other list
         otherList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if(i==0){
-                    FavouriteDialog fragment = new FavouriteDialog();
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable("data",(Serializable) DatabaseOperation.getFavourite(getApplicationContext()));
-                    fragment.setArguments(bundle);
-                    fragment.show(getSupportFragmentManager(),null);
-                }
+
+                    switch (i){
+
+                        case 0:
+                            //click action for favourite
+                            FavouriteDialog fragment = new FavouriteDialog();
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("data",(Serializable) DatabaseOperation.getFavourite(getApplicationContext()));
+                            fragment.setArguments(bundle);
+                            fragment.show(getSupportFragmentManager(),null);
+                            break;
+                        case 1:
+                            //click action for notification
+                            break;
+
+                        case 2:
+                            //click action for about
+
+                            break;
+                    }
+
             }
         });
     }
@@ -296,9 +404,21 @@ mScroll = findViewById(R.id.scroll);
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_fav) {
-            if(DatabaseOperation.InsertData(this,currentTitle, webView.getUrl())){
-                Toast.makeText(this, "Favourite added",Toast.LENGTH_LONG).show();
+            if (webView.getUrl() == null || webView.getUrl().length() <= 0) {
+                Toast.makeText(this, "Favourite not added",Toast.LENGTH_LONG).show();
+            } else {
+                if(currentTitle.contains("Web page not available")){
+                    Toast.makeText(this, "Favourite not added",Toast.LENGTH_LONG).show();
+                }else{
+                    if(DatabaseOperation.InsertData(this,currentTitle, webView.getUrl())){
+                        Toast.makeText(this, "Favourite added",Toast.LENGTH_LONG).show();
+                    }else{
+                        Toast.makeText(this, "Favourite not added",Toast.LENGTH_LONG).show();
+                    }
+                }
+
             }
+
             return true;
         }
 
